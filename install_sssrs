@@ -1,0 +1,24 @@
+# Puppet manifest to install SSRS 
+
+# Define the path to the SSRS installer and installation directory
+$ssrs_installer_path = 'C:\\setup\\SSRS_installer.exe'
+$ssrs_install_directory = 'C:\\ssrs'
+
+# Ensure the installation directory exists
+file { $ssrs_install_directory:
+  ensure => directory,
+}
+
+# Install SSRS
+exec { 'install_ssrs':
+  command => "$ssrs_installer_path /quiet /installPath=$ssrs_install_directory",
+  provider => powershell,
+  require  => File[$ssrs_install_directory],
+}
+
+# Ensure SSRS service is running
+service { 'ReportServer':
+  ensure => running,
+  enable => true,
+  require => Exec['install_ssrs'],
+}
